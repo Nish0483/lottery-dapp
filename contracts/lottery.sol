@@ -24,16 +24,16 @@ contract raffle is VRFConsumerBaseV2 {
     address payable  public owner;
     uint public interval ;
     bool winnerPicked=false;
-    bool randomGenerated= false;
+    bool public randomGenerated= false;
     
 
 
-    constructor(address vrfCoordinator) VRFConsumerBaseV2(vrfCoordinator) {
-        vrf = VRFCoordinatorV2Interface(vrfCoordinator);
+    constructor() VRFConsumerBaseV2(0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625) {
+        vrf = VRFCoordinatorV2Interface(0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625);
         keyHash = 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c;
-        subId = 3650;
+        subId = 5609;
         minimumRequestConfirmations = 3; 
-        callbackGasLimit = 2000000;
+        callbackGasLimit = 2500000;
         numWords = 1;
         entranceFee= 0.001 ether;
         owner =payable(msg.sender);
@@ -63,7 +63,7 @@ contract raffle is VRFConsumerBaseV2 {
         return playersList;
     }
 
-   event initializeVRFEvent (uint256 requestId);
+  
 
     function initializeVRF() public returns (uint256) 
     {
@@ -78,29 +78,32 @@ contract raffle is VRFConsumerBaseV2 {
             callbackGasLimit,
             numWords
         );
-        emit initializeVRFEvent(requestId);
+
+        
         return requestId;
+        
     }
 
-    event fulfillEvent ( uint256 random,address winner ) ;
-
-    function fulfillRandomWords(uint256 , uint256[] memory randomWords) internal override {
-        
-      
+  
+ event fulfill(uint256 rand,uint index , address winner);
+    function fulfillRandomWords (uint256 , uint256[] memory randomWords) internal override  {
         random=randomWords[0];
+        randomGenerated=true;
         uint256 index=random % (players.length);
         winner=players[index];
         winnerPicked=true;
-       
-        emit fulfillEvent(random,winner);
-            
+        emit fulfill(random,index,winner);
+        }
+  
 
-    }
+
+
+
 
     function announceWinner() public view returns(address)
     {   
-        require(winnerPicked==true,"winner not picked yet");
-        
+        //require(randomGenerated==true,"fail to gen random");
+       
         return(winner);
         
     }
